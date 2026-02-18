@@ -29,10 +29,21 @@ record:
   retain:
     days: 14
     mode: all
-  events:
+
+# --- Review (alerts & detections) ---
+review:
+  alerts:
+    labels:
+      - person
+      - car
     retain:
-      default: 30
-      mode: active_objects
+      days: 30
+  detections:
+    labels:
+      - dog
+      - cat
+    retain:
+      days: 14
 
 # --- Snapshots settings (global) ---
 snapshots:
@@ -70,6 +81,7 @@ cameras:
           roles:
             - detect
     detect:
+      enabled: true
       width: 1280
       height: 720
       fps: 5
@@ -94,6 +106,7 @@ cameras:
           roles:
             - detect
     detect:
+      enabled: true
       width: 1280
       height: 720
       fps: 5
@@ -101,11 +114,6 @@ cameras:
       threshold: 30
       contour_area: 50
     zones: {}
-
-# --- UI ---
-ui:
-  live_mode: mse
-  timezone: America/Mexico_City
 
 # --- Logger ---
 logger:

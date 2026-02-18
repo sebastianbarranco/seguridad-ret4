@@ -1,5 +1,6 @@
 # Frigate config for DEVELOPMENT with RTSP simulator
 # Uses rtsp-sim container instead of real cameras
+# Compatible with Frigate 0.14+
 
 mqtt:
   enabled: false
@@ -22,10 +23,16 @@ record:
   retain:
     days: 3
     mode: all
-  events:
-    retain:
-      default: 7
-      mode: active_objects
+
+review:
+  alerts:
+    labels:
+      - person
+      - car
+  detections:
+    labels:
+      - dog
+      - cat
 
 snapshots:
   enabled: true
@@ -51,6 +58,7 @@ cameras:
           roles:
             - detect
     detect:
+      enabled: true
       width: 640
       height: 360
       fps: 5
@@ -66,13 +74,10 @@ cameras:
           roles:
             - detect
     detect:
+      enabled: true
       width: 640
       height: 360
       fps: 5
-
-ui:
-  live_mode: mse
-  timezone: America/Mexico_City
 
 logger:
   default: info

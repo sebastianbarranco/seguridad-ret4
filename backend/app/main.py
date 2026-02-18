@@ -47,10 +47,12 @@ def _seed_data():
         # Tenant
         tenant = Tenant(id=uuid.uuid4(), name="Default Tenant")
         db.add(tenant)
+        db.flush()
 
         # Site
         site = Site(id=uuid.uuid4(), tenant_id=tenant.id, name="Sitio Principal", timezone="America/Mexico_City")
         db.add(site)
+        db.flush()
 
         # SuperAdmin user
         admin = User(
@@ -62,6 +64,7 @@ def _seed_data():
             is_active=True,
         )
         db.add(admin)
+        db.flush()
 
         # Default cameras (matching Frigate config)
         cam1 = Camera(
@@ -95,8 +98,11 @@ async def lifespan(app: FastAPI):
     # Startup
     log.info("app_starting")
 
-    # Run migrations (in prod, prefer explicit alembic upgrade)
-    Base.metadata.create_all(bind=engine)
+    # Create tables (in prod, prefer explicit alembic upgrade)
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        log.warning("create_all_warning", error=str(e))
 
     # Seed default data
     _seed_data()
