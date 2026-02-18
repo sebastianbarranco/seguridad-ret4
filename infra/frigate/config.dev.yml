@@ -1,0 +1,78 @@
+# Frigate config for DEVELOPMENT with RTSP simulator
+# Uses rtsp-sim container instead of real cameras
+
+mqtt:
+  enabled: false
+
+database:
+  path: /config/frigate.db
+
+ffmpeg:
+  hwaccel_args: []  # No GPU in dev (use CPU decode)
+  output_args:
+    record: preset-record-generic-audio-copy
+
+detectors:
+  cpu1:
+    type: cpu
+    num_threads: 2
+
+record:
+  enabled: true
+  retain:
+    days: 3
+    mode: all
+  events:
+    retain:
+      default: 7
+      mode: active_objects
+
+snapshots:
+  enabled: true
+  retain:
+    default: 7
+
+objects:
+  track:
+    - person
+    - car
+    - dog
+    - cat
+
+cameras:
+  cam_entrada:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://rtsp-sim:8554/cam_entrada/stream1
+          roles:
+            - record
+        - path: rtsp://rtsp-sim:8554/cam_entrada/stream2
+          roles:
+            - detect
+    detect:
+      width: 640
+      height: 360
+      fps: 5
+
+  cam_patio:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://rtsp-sim:8554/cam_patio/stream1
+          roles:
+            - record
+        - path: rtsp://rtsp-sim:8554/cam_patio/stream2
+          roles:
+            - detect
+    detect:
+      width: 640
+      height: 360
+      fps: 5
+
+ui:
+  live_mode: mse
+  timezone: America/Mexico_City
+
+logger:
+  default: info

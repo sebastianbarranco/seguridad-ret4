@@ -1,0 +1,114 @@
+# Frigate NVR Configuration — MVP 2 Cameras
+# Docs: https://docs.frigate.video/configuration/
+
+mqtt:
+  enabled: false  # MVP: polling HTTP; enable later for real-time
+
+database:
+  path: /config/frigate.db
+
+# --- Hardware acceleration (NVIDIA GPU) ---
+ffmpeg:
+  hwaccel_args: preset-nvidia-h264
+  output_args:
+    record: preset-record-generic-audio-copy
+
+# --- Detectors ---
+detectors:
+  cpu1:
+    type: cpu
+    num_threads: 4
+  # Uncomment below for TensorRT on NVIDIA GPU:
+  # tensorrt:
+  #   type: tensorrt
+  #   device: 0
+
+# --- Recording settings (global) ---
+record:
+  enabled: true
+  retain:
+    days: 14
+    mode: all
+  events:
+    retain:
+      default: 30
+      mode: active_objects
+
+# --- Snapshots settings (global) ---
+snapshots:
+  enabled: true
+  retain:
+    default: 30
+
+# --- Object detection (global) ---
+objects:
+  track:
+    - person
+    - car
+    - dog
+    - cat
+  filters:
+    person:
+      min_score: 0.5
+      threshold: 0.7
+    car:
+      min_score: 0.5
+      threshold: 0.7
+
+# --- Cameras ---
+cameras:
+  cam_entrada:
+    enabled: true
+    ffmpeg:
+      inputs:
+        # Main stream — record at full quality
+        - path: rtsp://admin:password@192.168.100.10:554/stream1
+          roles:
+            - record
+        # Sub stream — lower res for detection (5 fps)
+        - path: rtsp://admin:password@192.168.100.10:554/stream2
+          roles:
+            - detect
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
+    motion:
+      threshold: 30
+      contour_area: 50
+    zones: {}
+    # Uncomment and adjust for specific object rules per camera
+    # objects:
+    #   filters:
+    #     person:
+    #       min_area: 5000
+
+  cam_patio:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://admin:password@192.168.100.11:554/stream1
+          roles:
+            - record
+        - path: rtsp://admin:password@192.168.100.11:554/stream2
+          roles:
+            - detect
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
+    motion:
+      threshold: 30
+      contour_area: 50
+    zones: {}
+
+# --- UI ---
+ui:
+  live_mode: mse
+  timezone: America/Mexico_City
+
+# --- Logger ---
+logger:
+  default: info
+  logs:
+    frigate.record: debug

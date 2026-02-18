@@ -1,0 +1,60 @@
+# MediaMTX configuration for RTSP simulation (dev/testing)
+# Docs: https://github.com/bluenviron/mediamtx
+#
+# This simulates 2 cameras for development without real hardware.
+# Place sample .mp4 files in the ./samples/ directory.
+
+# General settings
+logLevel: info
+logDestinations: [stdout]
+
+# RTSP server
+rtsp: true
+rtspAddress: :8554
+protocols: [tcp, udp]
+
+# HLS (optional, useful for browser preview)
+hls: true
+hlsAddress: :8888
+
+# Paths — each simulates a camera
+paths:
+  # Camera 1 — Entrada
+  cam_entrada/stream1:
+    source: publisher
+    runOnInit: >
+      ffmpeg -re -stream_loop -1
+      -i /samples/sample1.mp4
+      -c copy
+      -f rtsp rtsp://localhost:8554/cam_entrada/stream1
+    runOnInitRestart: true
+
+  cam_entrada/stream2:
+    source: publisher
+    runOnInit: >
+      ffmpeg -re -stream_loop -1
+      -i /samples/sample1.mp4
+      -vf scale=640:360 -c:v libx264 -preset ultrafast -b:v 500k
+      -an
+      -f rtsp rtsp://localhost:8554/cam_entrada/stream2
+    runOnInitRestart: true
+
+  # Camera 2 — Patio
+  cam_patio/stream1:
+    source: publisher
+    runOnInit: >
+      ffmpeg -re -stream_loop -1
+      -i /samples/sample2.mp4
+      -c copy
+      -f rtsp rtsp://localhost:8554/cam_patio/stream1
+    runOnInitRestart: true
+
+  cam_patio/stream2:
+    source: publisher
+    runOnInit: >
+      ffmpeg -re -stream_loop -1
+      -i /samples/sample2.mp4
+      -vf scale=640:360 -c:v libx264 -preset ultrafast -b:v 500k
+      -an
+      -f rtsp rtsp://localhost:8554/cam_patio/stream2
+    runOnInitRestart: true

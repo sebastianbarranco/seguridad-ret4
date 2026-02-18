@@ -1,0 +1,53 @@
+# Environment
+.env
+.env.local
+.env.production
+
+# Data volumes (never commit)
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+.next/
+out/
+frontend/.next/
+frontend/node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# rclone config (contains tokens)
+infra/rclone/config/rclone.conf
+
+# Samples (large video files)
+samples/*.mp4
+samples/*.mkv
+samples/*.avi
+
+# Logs
+*.log
+data/backup-logs/
+
+# Docker
+docker-compose.override.yml

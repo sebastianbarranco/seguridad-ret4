@@ -1,0 +1,45 @@
+# ============================================================
+# Caddyfile — NVR Portal Reverse Proxy
+# ============================================================
+#
+# MODE 1: LAN/VPN (no public domain) — uses self-signed or internal CA
+# MODE 2: Public domain — automatic HTTPS via Let's Encrypt
+#
+# For LAN/VPN mode, use:
+#   :443 { tls internal }
+# For public domain mode, use:
+#   yourdomain.com { }
+# ============================================================
+
+:80, :443 {
+    # TLS: internal CA for LAN/VPN (no public domain)
+    # Replace with your domain for automatic Let's Encrypt
+    tls internal
+
+    # --- Security headers ---
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        -Server
+    }
+
+    # --- API requests → backend ---
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+
+    # --- Frontend (Next.js) ---
+    handle {
+        reverse_proxy frontend:3000
+    }
+
+    # --- Logs ---
+    log {
+        output stdout
+        format console
+        level INFO
+    }
+}

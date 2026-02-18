@@ -1,0 +1,171 @@
+services:
+  # ============================================================
+  # DATABASE
+  # ============================================================
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: nvr_portal
+      POSTGRES_USER: nvr
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nvr -d nvr_portal"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [core]
+    restart: unless-stopped
+
+  # ============================================================
+  # OBJECT STORAGE (MinIO — S3-compatible)
+  # ============================================================
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ./data/minio:/data
+    ports:
+      - "9001:9001"   # Console — LAN/VPN only
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [core]
+    restart: unless-stopped
+
+  # ============================================================
+  # NVR — Frigate
+  # ============================================================
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable
+    shm_size: "256mb"
+    volumes:
+      - ./infra/frigate/config.yml:/config/config.yml:ro
+      - ./data/frigate:/media/frigate
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "8971:8971"   # Authenticated UI/API — LAN/VPN only
+    restart: unless-stopped
+    networks: [core, cameras]
+
+  # ============================================================
+  # BACKEND — FastAPI
+  # ============================================================
+  backend:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://nvr:${POSTGRES_PASSWORD}@postgres:5432/nvr_portal
+      FRIGATE_BASE_URL: http://frigate:5000
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: evidence
+      JWT_SECRET: ${JWT_SECRET}
+      MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY}
+      TZ: America/Mexico_City
+      EVIDENCE_DIR: /evidence
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data/evidence:/evidence
+    networks: [core]
+    restart: unless-stopped
+
+  # ============================================================
+  # FRONTEND — Next.js
+  # ============================================================
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      NEXT_PUBLIC_API_BASE: /api
+    networks: [core]
+    restart: unless-stopped
+
+  # ============================================================
+  # REVERSE PROXY — Caddy (TLS)
+  # ============================================================
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./data/caddy/data:/data
+      - ./data/caddy/config:/config
+    networks: [core]
+    restart: unless-stopped
+
+  # ============================================================
+  # BACKUP — rclone + cron (nightly to Google Drive)
+  # ============================================================
+  backup:
+    build:
+      context: ./infra/rclone
+    environment:
+      TZ: America/Mexico_City
+      XDG_CONFIG_HOME: /config
+      RCLONE_CONFIG_PASS: ${RCLONE_CONFIG_PASS}
+      SOURCE_DIR: /source
+      DEST_REMOTE: ${RCLONE_DEST_REMOTE}
+      DEST_PATH: ${RCLONE_DEST_PATH}
+      RETENTION_DAYS: "14"
+    volumes:
+      - ./data/frigate:/source/frigate:ro
+      - ./data/evidence:/source/evidence:ro
+      - ./infra/rclone/config:/config/rclone
+      - ./data/backup-logs:/logs
+    networks: [core]
+    restart: unless-stopped
+
+  # ============================================================
+  # VPN — WireGuard (optional, activate with --profile vpn)
+  # ============================================================
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy:latest
+    environment:
+      WG_HOST: ${WG_HOST}
+      PASSWORD: ${WG_EASY_PASSWORD}
+    volumes:
+      - ./data/wireguard:/etc/wireguard
+    ports:
+      - "51820:51820/udp"
+      - "51821:51821"
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+    networks: [core]
+    restart: unless-stopped
+    profiles: ["vpn"]
+
+  # ============================================================
+  # RTSP SIMULATOR — for dev/testing without real cameras
+  # ============================================================
+  rtsp-sim:
+    image: bluenviron/mediamtx:latest
+    volumes:
+      - ./infra/rtsp-sim/mediamtx.yml:/mediamtx.yml:ro
+      - ./samples:/samples:ro
+    ports:
+      - "8554:8554"     # RTSP
+      - "8888:8888"     # WebRTC / HLS (optional)
+    networks: [cameras, core]
+    restart: unless-stopped
+    profiles: ["dev"]
+
+networks:
+  core: {}
+  cameras:
+    internal: true

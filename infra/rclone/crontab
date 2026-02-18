@@ -1,0 +1,2 @@
+# Backup nocturno — 02:10 AM (zona horaria del contenedor: TZ)
+10 2 * * * /work/backup.sh >> /logs/backup.log 2>&1

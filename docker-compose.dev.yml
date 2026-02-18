@@ -1,0 +1,18 @@
+# docker-compose.dev.yml — Development overrides
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up -d
+#
+# This enables the RTSP simulator and uses the dev Frigate config.
+
+services:
+  frigate:
+    volumes:
+      - ./infra/frigate/config.dev.yml:/config/config.yml:ro
+      - ./data/frigate:/media/frigate
+      - /etc/localtime:/etc/localtime:ro
+
+  rtsp-sim:
+    # Already defined in main compose with profile "dev"
+    # Just ensure samples exist
+    volumes:
+      - ./infra/rtsp-sim/mediamtx.yml:/mediamtx.yml:ro
+      - ./samples:/samples:ro
