@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVR Portal — Clase Interactiva</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface2: #334155;
+            --accent: #3b82f6;
+            --accent-glow: #60a5fa;
+            --green: #22c55e;
+            --yellow: #eab308;
+            --red: #ef4444;
+            --orange: #f97316;
+            --purple: #a855f7;
+            --cyan: #06b6d4;
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --border: #475569;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            height: 60px;
+        }
+        .navbar h1 {
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--accent), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        .nav-links {
+            margin-left: auto;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text);
+            background: var(--surface2);
+        }
+
+        /* ===== MAIN ===== */
+        main {
+            max-width: 1100px;
+            margin: 80px auto 4rem;
+            padding: 0 1.5rem;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+        }
+        .hero h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-glow), var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-dim);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-bar {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+        }
+        .progress-bar .bar {
+            background: var(--surface2);
+            border-radius: 8px;
+            height: 12px;
+            margin-top: 0.75rem;
+            overflow: hidden;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            border-radius: 8px;
+            background: linear-gradient(90deg, var(--accent), var(--cyan));
+            width: 0%;
+            transition: width 0.6s ease;
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        /* ===== SECTIONS ===== */
+        .section {
+            margin: 3rem 0;
+            scroll-margin-top: 80px;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+        }
+        .section-number {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .section-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .section-header .tag {
+            margin-left: auto;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        .card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+        }
+        .card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card p { color: var(--text-dim); font-size: 0.95rem; }
+
+        /* ===== CODE BLOCK ===== */
+        .code-block {
+            background: #0c1222;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 0.75rem 0;
+            position: relative;
+        }
+        .code-block .lang {
+            position: absolute;
+            top: 0.4rem;
+            right: 0.6rem;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            background: var(--surface2);
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+        }
+        .kw { color: #c084fc; }
+        .str { color: #86efac; }
+        .fn { color: #93c5fd; }
+        .cm { color: #64748b; }
+        .num { color: #fbbf24; }
+
+        /* ===== ARCHITECTURE DIAGRAM ===== */
+        .arch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .arch-box {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        .arch-box:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.15);
+        }
+        .arch-box.active {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .arch-box .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .arch-box .name { font-weight: 700; font-size: 1rem; }
+        .arch-box .tech { color: var(--text-dim); font-size: 0.8rem; margin-top: 0.25rem; }
+        .arch-box .port {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+
+        .detail-panel {
+            background: var(--surface);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+        .detail-panel.visible { display: block; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .detail-panel h4 { color: var(--accent-glow); margin-bottom: 0.75rem; }
+        .detail-panel ul { padding-left: 1.5rem; }
+        .detail-panel li { color: var(--text-dim); margin-bottom: 0.4rem; }
+        .detail-panel li strong { color: var(--text); }
+
+        /* ===== FLOW LIST ===== */
+        .flow-list {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .flow-list::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+        .flow-step {
+            position: relative;
+            margin-bottom: 1.25rem;
+            padding: 1rem 1.25rem;
+            background: var(--surface);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        .flow-step::before {
+            content: '';
+            position: absolute;
+            left: -1.65rem;
+            top: 1.25rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg);
+        }
+        .flow-step h5 { font-size: 1rem; margin-bottom: 0.3rem; }
+        .flow-step p { font-size: 0.9rem; color: var(--text-dim); }
+
+        /* ===== TABLE ===== */
+        .nice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        .nice-table th {
+            background: var(--surface2);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+        .nice-table td {
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid rgba(71,85,105,0.3);
+            color: var(--text-dim);
+        }
+        .nice-table tr:hover td { background: rgba(59,130,246,0.05); }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-blue { background: rgba(59,130,246,0.2); color: var(--accent-glow); }
+        .badge-green { background: rgba(34,197,94,0.2); color: var(--green); }
+        .badge-yellow { background: rgba(234,179,8,0.2); color: var(--yellow); }
+        .badge-red { background: rgba(239,68,68,0.2); color: var(--red); }
+        .badge-purple { background: rgba(168,85,247,0.2); color: var(--purple); }
+        .badge-orange { background: rgba(249,115,22,0.2); color: var(--orange); }
+        .badge-cyan { background: rgba(6,182,212,0.2); color: var(--cyan); }
+
+        /* ===== TABS ===== */
+        .tabs {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        .tab-btn {
+            padding: 0.6rem 1.25rem;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active {
+            color: var(--accent-glow);
+            border-bottom-color: var(--accent);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ===== QUIZ ===== */
+        .quiz-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        .quiz-card h4 { margin-bottom: 1rem; color: var(--accent-glow); }
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            margin: 0.4rem 0;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .quiz-option:hover { border-color: var(--accent); }
+        .quiz-option.correct { background: rgba(34,197,94,0.2); border-color: var(--green); }
+        .quiz-option.wrong { background: rgba(239,68,68,0.15); border-color: var(--red); }
+        .quiz-result {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero h2 { font-size: 1.8rem; }
+            .arch-grid { grid-template-columns: repeat(2, 1fr); }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ======================== NAVBAR ======================== -->
+<nav class="navbar">
+    <h1>📹 NVR Portal — Clase Interactiva</h1>
+    <div class="nav-links">
+        <a href="#arquitectura">Arquitectura</a>
+        <a href="#componentes">Componentes</a>
+        <a href="#flujos">Flujos</a>
+        <a href="#seguridad">Seguridad</a>
+        <a href="#api">API</a>
+        <a href="#quiz">Quiz</a>
+    </div>
+</nav>
+
+<main>
+
+<!-- ======================== HERO ======================== -->
+<div class="hero">
+    <h2>Sistema de Videovigilancia On-Prem</h2>
+    <p>Clase interactiva del MVP: 2 cámaras RTSP, portal web con RBAC/MFA, respaldo nocturno cifrado a Google Drive. Haz clic en cada componente para aprender qué hace.</p>
+</div>
+
+<!-- ======================== PROGRESS ======================== -->
+<div class="progress-bar">
+    <div class="progress-label">
+        <span>Tu progreso en la clase</span>
+        <span id="progress-text">0 / 6 secciones</span>
+    </div>
+    <div class="bar"><div class="fill" id="progress-fill"></div></div>
+</div>
+
+<!-- ======================== 1. VISIÓN GENERAL ======================== -->
+<div class="section" id="vision">
+    <div class="section-header" onclick="markSection(1)">
+        <div class="section-number" style="background:rgba(59,130,246,0.2);color:var(--accent-glow)">1</div>
+        <h3>Visión General — ¿Qué es esto?</h3>
+        <span class="tag badge-blue">Concepto</span>
+    </div>
+
+    <div class="card">
+        <h4>🎯 El Problema</h4>
+        <p>Necesitamos un sistema de seguridad con cámaras que: grabe 24/7, detecte personas/autos automáticamente, permita a varios administradores ver eventos desde cualquier lugar, exporte evidencia con validez legal (SHA-256), y respalde todo en la nube de forma cifrada.</p>
+    </div>
+
+    <div class="card">
+        <h4>💡 La Solución</h4>
+        <p>Un stack completo en Docker que corre en un servidor local (on-prem). No dependemos de servicios cloud para funcionar — todo corre en nuestra red. El backup a Google Drive es solo para redundancia.</p>
+    </div>
+
+    <div class="card">
+        <h4>🏗️ Principios de Diseño</h4>
+        <table class="nice-table">
+            <tr><td><strong>On-Prem primero</strong></td><td>Todo funciona sin internet. El cloud es solo backup.</td></tr>
+            <tr><td><strong>Contenedores</strong></td><td>Cada servicio corre aislado en Docker. Si uno falla, no tumba los demás.</td></tr>
+            <tr><td><strong>Proxy de medios</strong></td><td>El frontend NUNCA habla con Frigate directamente — todo pasa por el backend.</td></tr>
+            <tr><td><strong>Zero Trust</strong></td><td>Autenticación JWT + RBAC + MFA opcional. Auditoría de toda acción.</td></tr>
+            <tr><td><strong>Cadena de custodia</strong></td><td>La evidencia exportada tiene hash SHA-256 + manifest JSON inmanipulable.</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- ======================== 2. ARQUITECTURA ======================== -->
+<div class="section" id="arquitectura">
+    <div class="section-header" onclick="markSection(2)">
+        <div class="section-number" style="background:rgba(34,197,94,0.2);color:var(--green)">2</div>
+        <h3>Arquitectura — Los Bloques</h3>
+        <span class="tag badge-green">Interactivo</span>
+    </div>
+
+    <p style="color:var(--text-dim);margin-bottom:1rem;">👇 Haz clic en cada bloque para ver qué hace, qué tecnología usa y por qué está ahí.</p>
+
+    <div class="arch-grid">
+        <div class="arch-box" onclick="showDetail('frigate')">
+            <div class="port">:8971</div>
+            <div class="icon">📹</div>
+            <div class="name">Frigate NVR</div>
+            <div class="tech">AI Detection</div>
+        </div>
+        <div class="arch-box" onclick="showDetail('backend')">
+            <div class="port">:8000</div>
+            <div class="icon">⚙️</div>
+            <div class="name">Backend</div>
+            <div class="tech">FastAPI + Python</div>
+        </div>
+        <div class="arch-box" onclick="showDetail('frontend')">
+            <div class="port">:3000</div>
+            <div class="icon">🖥️</div>
+            <div class="name">Frontend</div>
+            <div class="tech">Next.js + React</div>
+        </div>
+        <div class="arch-box" onclick="showDetail('postgres')">
+            <div class="port">:5432</div>
+            <div class="icon">🗄️</div>
+            <div class="name">PostgreSQL</div>
+            <div class="tech">Base de datos</div>
+        </div>
+        <div class="arch-box" onclick="showDetail('minio')">
+            <div class="port">:9001</div>
+            <div class="icon">📦</div>
+            <div class="name">MinIO</div>
+            <div class="tech">Object Storage</div>
+        </div>
+        <div class="arch-box" onclick="showDetail('caddy')">
+            <div class="port">:443</div>
+            <div class="icon">🔒</div>
+            <div class="name">Caddy</div>
+            <div class="tech">Reverse Proxy</div>
+        </div>
+        <div class="arch-box" onclick="showDetail('backup')">
+            <div class="icon">☁️</div>
+            <div class="name">rclone</div>
+            <div class="tech">Backup Nocturno</div>
+        </div>
+        <div class="arch-box" onclick="showDetail('rtsp')">
+            <div class="port">:8554</div>
+            <div class="icon">🎬</div>
+            <div class="name">RTSP Sim</div>
+            <div class="tech">MediaMTX (Dev)</div>
+        </div>
+    </div>
+
+    <div class="detail-panel" id="detail-panel">
+        <h4 id="detail-title"></h4>
+        <p id="detail-desc"></p>
+        <div id="detail-extra"></div>
+    </div>
+</div>
+
+<!-- ======================== 3. COMPONENTES ======================== -->
+<div class="section" id="componentes">
+    <div class="section-header" onclick="markSection(3)">
+        <div class="section-number" style="background:rgba(168,85,247,0.2);color:var(--purple)">3</div>
+        <h3>Componentes a Fondo</h3>
+        <span class="tag badge-purple">Código</span>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(event,'tab-backend')">Backend</button>
+        <button class="tab-btn" onclick="switchTab(event,'tab-frontend')">Frontend</button>
+        <button class="tab-btn" onclick="switchTab(event,'tab-docker')">Docker</button>
+        <button class="tab-btn" onclick="switchTab(event,'tab-db')">Base de Datos</button>
+    </div>
+
+    <!-- TAB: Backend -->
+    <div class="tab-content active" id="tab-backend">
+        <div class="card">
+            <h4>⚙️ FastAPI — El cerebro del sistema</h4>
+            <p>Framework web moderno de Python. Genera documentación automática, validación de datos con Pydantic, y es extremadamente rápido (async-ready).</p>
+            <div class="code-block">
+                <span class="lang">Python</span>
+<span class="cm"># Estructura del backend</span>
+backend/
+├── app/
+│   ├── <span class="fn">main.py</span>          <span class="cm"># Punto de entrada — arranca todo</span>
+│   ├── <span class="fn">config.py</span>        <span class="cm"># Variables de entorno → Settings</span>
+│   ├── <span class="fn">database.py</span>      <span class="cm"># Conexión a PostgreSQL</span>
+│   ├── api/              <span class="cm"># Endpoints REST</span>
+│   │   ├── <span class="fn">auth.py</span>      <span class="cm"># Login, logout, MFA</span>
+│   │   ├── <span class="fn">events.py</span>    <span class="cm"># Eventos de Frigate</span>
+│   │   ├── <span class="fn">evidence.py</span>  <span class="cm"># Exportar evidencia legal</span>
+│   │   ├── <span class="fn">cameras.py</span>   <span class="cm"># CRUD cámaras</span>
+│   │   ├── <span class="fn">users.py</span>     <span class="cm"># CRUD usuarios (SuperAdmin)</span>
+│   │   └── <span class="fn">audit.py</span>     <span class="cm"># Log de auditoría</span>
+│   ├── core/             <span class="cm"># Seguridad</span>
+│   │   ├── <span class="fn">__init__.py</span>  <span class="cm"># JWT + bcrypt + encryption</span>
+│   │   ├── <span class="fn">deps.py</span>      <span class="cm"># Auth middleware + RBAC</span>
+│   │   └── <span class="fn">mfa.py</span>       <span class="cm"># TOTP (Google Authenticator)</span>
+│   ├── models/           <span class="cm"># Tablas de la BD (SQLAlchemy)</span>
+│   ├── schemas/          <span class="cm"># Validación de datos (Pydantic)</span>
+│   └── services/
+│       └── <span class="fn">frigate_sync.py</span> <span class="cm"># Sincroniza eventos de Frigate</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h4>🔐 Cómo funciona la autenticación</h4>
+            <div class="code-block">
+                <span class="lang">Python</span>
+<span class="cm"># 1. Usuario envía email + password</span>
+POST /api/auth/login  →  { username, password }
+
+<span class="cm"># 2. Backend verifica con bcrypt</span>
+bcrypt.checkpw(password, stored_hash)  <span class="cm"># True/False</span>
+
+<span class="cm"># 3. Si OK, genera JWT token (dura 1 hora)</span>
+token = { sub: <span class="str">"user-uuid"</span>, role: <span class="str">"superadmin"</span>, exp: <span class="num">timestamp</span> }
+
+<span class="cm"># 4. Frontend guarda el token en localStorage</span>
+<span class="cm"># 5. Cada request envía: Authorization: Bearer &lt;token&gt;</span>
+
+<span class="cm"># 6. Backend decodifica y verifica en cada endpoint</span>
+<span class="kw">def</span> <span class="fn">get_current_user</span>(token) → User  <span class="cm"># middleware automático</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h4>📡 Sincronización con Frigate</h4>
+            <p>Cada 30 segundos, el backend consulta la API de Frigate (<code>http://frigate:5000/api/events</code>), compara con lo que ya tiene en PostgreSQL, e inserta los eventos nuevos.</p>
+            <div class="code-block">
+                <span class="lang">Python</span>
+<span class="cm"># frigate_sync.py — cada 30 segundos</span>
+<span class="kw">def</span> <span class="fn">sync_events_from_frigate</span>(db):
+    events = httpx.get(<span class="str">"http://frigate:5000/api/events"</span>)
+    <span class="kw">for</span> ev <span class="kw">in</span> events:
+        <span class="kw">if not</span> exists_in_db(ev[<span class="str">"id"</span>]):
+            db.add(Event(
+                frigate_event_id=ev[<span class="str">"id"</span>],
+                label=ev[<span class="str">"label"</span>],         <span class="cm"># "person", "car"</span>
+                score=ev[<span class="str">"top_score"</span>],     <span class="cm"># 0.0 - 1.0</span>
+                start_time=ev[<span class="str">"start_time"</span>],
+            ))
+    db.commit()
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: Frontend -->
+    <div class="tab-content" id="tab-frontend">
+        <div class="card">
+            <h4>🖥️ Next.js 14 — La interfaz web</h4>
+            <p>Framework React con App Router, server-side rendering, y build estático (standalone). El portal tiene tema oscuro con Tailwind CSS.</p>
+        </div>
+
+        <table class="nice-table">
+            <thead>
+                <tr><th>Página</th><th>Ruta</th><th>Qué muestra</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><span class="badge badge-blue">Login</span></td><td><code>/login</code></td><td>Email + password, soporta MFA</td></tr>
+                <tr><td><span class="badge badge-green">Dashboard</span></td><td><code>/dashboard</code></td><td>Stats: eventos, cámaras, salud del sistema</td></tr>
+                <tr><td><span class="badge badge-yellow">Eventos</span></td><td><code>/events</code></td><td>Lista con filtros, sync, exportar, ver snapshot/clip</td></tr>
+                <tr><td><span class="badge badge-cyan">Cámaras</span></td><td><code>/cameras</code></td><td>Grid de cámaras con estado activo/inactivo</td></tr>
+                <tr><td><span class="badge badge-red">Evidencia</span></td><td><code>/evidence</code></td><td>Exportaciones con SHA-256 y manifests</td></tr>
+                <tr><td><span class="badge badge-purple">Usuarios</span></td><td><code>/users</code></td><td>CRUD usuarios, roles, estado MFA</td></tr>
+                <tr><td><span class="badge badge-orange">Auditoría</span></td><td><code>/audit</code></td><td>Registro de todas las acciones del sistema</td></tr>
+                <tr><td><span class="badge badge-green">Backups</span></td><td><code>/backups</code></td><td>Historial de respaldos a Google Drive</td></tr>
+            </tbody>
+        </table>
+
+        <div class="card" style="margin-top:1rem">
+            <h4>🔗 Cómo habla el frontend con el backend</h4>
+            <div class="code-block">
+                <span class="lang">TypeScript</span>
+<span class="cm">// src/lib/api.ts — cliente HTTP centralizado</span>
+
+<span class="cm">// El frontend NUNCA llama a Frigate directamente</span>
+<span class="cm">// Todo pasa por: Frontend → Caddy → Backend → Frigate</span>
+
+<span class="kw">async function</span> <span class="fn">apiFetch</span>(path, options) {
+    headers[<span class="str">'Authorization'</span>] = <span class="str">`Bearer ${token}`</span>
+    <span class="kw">return</span> fetch(<span class="str">`/api${path}`</span>, { headers, ...options })
+}
+
+<span class="cm">// Ejemplo: obtener eventos</span>
+<span class="kw">export</span> <span class="kw">function</span> <span class="fn">getEvents</span>() {
+  <span class="kw">return</span> apiFetch(<span class="str">'/events'</span>)
+}
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: Docker -->
+    <div class="tab-content" id="tab-docker">
+        <div class="card">
+            <h4>🐳 Docker Compose — La orquestación</h4>
+            <p>Todo corre en contenedores Docker. Un solo comando levanta 8 servicios. Hay 2 redes: <strong>core</strong> (todos) y <strong>cameras</strong> (solo Frigate + simulador, aislada).</p>
+        </div>
+
+        <table class="nice-table">
+            <thead><tr><th>Servicio</th><th>Imagen</th><th>Puerto</th><th>Depende de</th></tr></thead>
+            <tbody>
+                <tr><td>postgres</td><td>postgres:16</td><td>5432 (interno)</td><td>—</td></tr>
+                <tr><td>minio</td><td>minio/minio</td><td>9001</td><td>—</td></tr>
+                <tr><td>frigate</td><td>frigate:stable</td><td>8971</td><td>—</td></tr>
+                <tr><td>backend</td><td>python:3.12</td><td>8000 (interno)</td><td>postgres ✅</td></tr>
+                <tr><td>frontend</td><td>node:20</td><td>3000 (interno)</td><td>—</td></tr>
+                <tr><td>caddy</td><td>caddy:2</td><td>80, 443</td><td>—</td></tr>
+                <tr><td>backup</td><td>alpine + rclone</td><td>—</td><td>—</td></tr>
+                <tr><td>rtsp-sim</td><td>mediamtx</td><td>8554 <span class="badge badge-yellow">dev</span></td><td>—</td></tr>
+            </tbody>
+        </table>
+
+        <div class="card" style="margin-top:1rem">
+            <h4>📂 Volúmenes — Datos persistentes</h4>
+            <div class="code-block">
+                <span class="lang">YAML</span>
+data/
+├── postgres/     <span class="cm"># Base de datos (usuarios, eventos, metadata)</span>
+├── frigate/      <span class="cm"># Grabaciones 24/7 + clips + snapshots</span>
+├── evidence/     <span class="cm"># Evidencia sellada exportada</span>
+├── minio/        <span class="cm"># Object storage (alternativo)</span>
+├── caddy/        <span class="cm"># Certificados TLS</span>
+├── wireguard/    <span class="cm"># Perfiles VPN</span>
+└── backup-logs/  <span class="cm"># Logs del backup nocturno</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: DB -->
+    <div class="tab-content" id="tab-db">
+        <div class="card">
+            <h4>🗄️ Modelo de Base de Datos</h4>
+            <p>PostgreSQL 16 con 9 tablas. Diseño multi-tenant: cada organización (Tenant) tiene sitios (Sites), y cada sitio tiene cámaras y usuarios.</p>
+        </div>
+
+        <table class="nice-table">
+            <thead><tr><th>Tabla</th><th>Campos clave</th><th>Relaciones</th></tr></thead>
+            <tbody>
+                <tr><td><span class="badge badge-blue">tenants</span></td><td>id, name</td><td>→ sites, users</td></tr>
+                <tr><td><span class="badge badge-blue">sites</span></td><td>id, tenant_id, name, timezone</td><td>→ cameras</td></tr>
+                <tr><td><span class="badge badge-green">users</span></td><td>id, email, password_hash, role</td><td>→ tenant</td></tr>
+                <tr><td><span class="badge badge-purple">mfa_totp</span></td><td>user_id, encrypted_secret</td><td>→ user</td></tr>
+                <tr><td><span class="badge badge-cyan">cameras</span></td><td>id, site_id, frigate_name</td><td>→ site, events</td></tr>
+                <tr><td><span class="badge badge-yellow">events</span></td><td>id, frigate_event_id, label, score</td><td>→ camera</td></tr>
+                <tr><td><span class="badge badge-red">evidence_exports</span></td><td>id, event_id, sha256, manifest</td><td>→ event</td></tr>
+                <tr><td><span class="badge badge-orange">audit_log</span></td><td>actor, action, resource, ip</td><td>→ user</td></tr>
+                <tr><td><span class="badge badge-green">backup_runs</span></td><td>started_at, status, bytes</td><td>—</td></tr>
+            </tbody>
+        </table>
+
+        <div class="card" style="margin-top:1rem">
+            <h4>👥 Roles RBAC</h4>
+            <table class="nice-table">
+                <thead><tr><th>Rol</th><th>Puede hacer</th></tr></thead>
+                <tbody>
+                    <tr><td><span class="badge badge-red">SUPERADMIN</span></td><td>Todo: crear usuarios, ver auditoría, exportar evidencia, gestionar cámaras</td></tr>
+                    <tr><td><span class="badge badge-yellow">ADMIN</span></td><td>Ver eventos, exportar evidencia, sincronizar, ver cámaras</td></tr>
+                    <tr><td><span class="badge badge-green">READONLY</span></td><td>Solo ver: dashboard, eventos, cámaras</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ======================== 4. FLUJOS ======================== -->
+<div class="section" id="flujos">
+    <div class="section-header" onclick="markSection(4)">
+        <div class="section-number" style="background:rgba(234,179,8,0.2);color:var(--yellow)">4</div>
+        <h3>Flujos de Datos — Cómo funciona todo junto</h3>
+        <span class="tag badge-yellow">Diagrama</span>
+    </div>
+
+    <h4 style="margin-bottom:1rem;color:var(--accent-glow)">Flujo 1: Una persona entra al patio</h4>
+    <div class="flow-list">
+        <div class="flow-step">
+            <h5>📹 Cámara detecta movimiento</h5>
+            <p>La cámara del patio envía stream RTSP en tiempo real al servidor.</p>
+        </div>
+        <div class="flow-step">
+            <h5>🧠 Frigate analiza con IA</h5>
+            <p>Frigate recibe el stream, ejecuta detección de objetos a 5fps. Detecta: "person" con 87% de confianza.</p>
+        </div>
+        <div class="flow-step">
+            <h5>💾 Frigate guarda evento</h5>
+            <p>Crea un snapshot (.jpg), un clip de video (.mp4), y registra el evento en su base de datos interna.</p>
+        </div>
+        <div class="flow-step">
+            <h5>🔄 Backend sincroniza (cada 30s)</h5>
+            <p>El backend consulta <code>GET http://frigate:5000/api/events</code>, encuentra el evento nuevo, lo inserta en PostgreSQL y lo asocia a la cámara "cam_patio".</p>
+        </div>
+        <div class="flow-step">
+            <h5>🖥️ Admin ve el evento en el portal</h5>
+            <p>En la página de Eventos, aparece: "person detectada en Cámara Patio a las 15:42, confianza 87%". Puede ver el snapshot y descargar el clip.</p>
+        </div>
+        <div class="flow-step">
+            <h5>📁 Admin exporta como evidencia</h5>
+            <p>Click en "Exportar". El backend descarga el clip de Frigate, calcula el hash SHA-256, genera un manifest JSON con metadata, y lo guarda en <code>/evidence</code>.</p>
+        </div>
+    </div>
+
+    <h4 style="margin:2rem 0 1rem;color:var(--accent-glow)">Flujo 2: Backup nocturno</h4>
+    <div class="flow-list">
+        <div class="flow-step">
+            <h5>⏰ 02:10 AM — Cron dispara backup</h5>
+            <p>El contenedor de backup ejecuta <code>backup.sh</code> automáticamente.</p>
+        </div>
+        <div class="flow-step">
+            <h5>☁️ rclone copia a Google Drive</h5>
+            <p>Sube grabaciones, clips y evidencia. Usa cifrado (crypt) en tránsito y en reposo. Solo copia lo nuevo (incremental).</p>
+        </div>
+        <div class="flow-step">
+            <h5>✅ Verifica integridad</h5>
+            <p><code>rclone check</code> compara hashes para asegurar que todo se subió correctamente.</p>
+        </div>
+        <div class="flow-step">
+            <h5>🗑️ Limpieza por retención</h5>
+            <p>Elimina backups con más de 14 días (configurable).</p>
+        </div>
+    </div>
+</div>
+
+<!-- ======================== 5. SEGURIDAD ======================== -->
+<div class="section" id="seguridad">
+    <div class="section-header" onclick="markSection(5)">
+        <div class="section-number" style="background:rgba(239,68,68,0.2);color:var(--red)">5</div>
+        <h3>Seguridad — Capas de Protección</h3>
+        <span class="tag badge-red">Crítico</span>
+    </div>
+
+    <div class="arch-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        <div class="card">
+            <h4>🔒 Capa 1: Red</h4>
+            <p><strong>Red cameras:</strong> aislada (internal: true). Las cámaras no pueden salir a internet. Solo Frigate las ve.</p>
+            <p><strong>Red core:</strong> servicios internos. Solo Caddy expone puertos al exterior.</p>
+            <p><strong>WireGuard:</strong> VPN para acceso remoto seguro (opcional).</p>
+        </div>
+        <div class="card">
+            <h4>🛡️ Capa 2: Proxy</h4>
+            <p><strong>Caddy:</strong> TLS automático (Let's Encrypt o certificado interno). Headers de seguridad: HSTS, X-Frame-Options DENY, CSP.</p>
+            <p>Todo el tráfico HTTP se redirige a HTTPS.</p>
+        </div>
+        <div class="card">
+            <h4>🔑 Capa 3: Autenticación</h4>
+            <p><strong>JWT:</strong> tokens firmados con HS256, expiran en 1 hora.</p>
+            <p><strong>bcrypt:</strong> passwords hasheados con sal (nunca en texto plano).</p>
+            <p><strong>MFA:</strong> TOTP opcional (Google Authenticator/Authy).</p>
+        </div>
+        <div class="card">
+            <h4>👮 Capa 4: Autorización</h4>
+            <p><strong>RBAC:</strong> 3 roles (SuperAdmin, Admin, ReadOnly). Cada endpoint verifica el rol del usuario.</p>
+            <p><strong>Auditoría:</strong> CADA acción queda registrada con timestamp, IP, usuario y recurso afectado.</p>
+        </div>
+        <div class="card">
+            <h4>📋 Capa 5: Evidencia</h4>
+            <p><strong>SHA-256:</strong> cada archivo exportado tiene un hash criptográfico que prueba que no fue alterado.</p>
+            <p><strong>Manifest JSON:</strong> documento que vincula el hash, el evento original, la fecha de exportación y el usuario que lo hizo.</p>
+        </div>
+        <div class="card">
+            <h4>☁️ Capa 6: Backup</h4>
+            <p><strong>rclone crypt:</strong> los archivos se cifran ANTES de salir del servidor. Ni Google puede ver el contenido.</p>
+            <p><strong>Verificación:</strong> <code>rclone check</code> compara hashes post-subida.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ======================== 6. API ======================== -->
+<div class="section" id="api">
+    <div class="section-header" onclick="markSection(6)">
+        <div class="section-number" style="background:rgba(6,182,212,0.2);color:var(--cyan)">6</div>
+        <h3>API Endpoints — Referencia Rápida</h3>
+        <span class="tag badge-cyan">Referencia</span>
+    </div>
+
+    <table class="nice-table">
+        <thead><tr><th>Método</th><th>Endpoint</th><th>Descripción</th><th>Requiere</th></tr></thead>
+        <tbody>
+            <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/auth/login</code></td><td>Iniciar sesión</td><td>—</td></tr>
+            <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/auth/mfa/totp/enroll</code></td><td>Activar 2FA</td><td>🔑 Token</td></tr>
+            <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/auth/mfa/totp/verify</code></td><td>Verificar código TOTP</td><td>🔑 Token</td></tr>
+            <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/events</code></td><td>Listar eventos detectados</td><td>🔑 Cualquiera</td></tr>
+            <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/events/sync</code></td><td>Forzar sincronización con Frigate</td><td>🔑 Admin+</td></tr>
+            <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/events/{id}/snapshot</code></td><td>Proxy de snapshot (imagen)</td><td>🔑 Cualquiera</td></tr>
+            <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/events/{id}/clip</code></td><td>Proxy de clip (video mp4)</td><td>🔑 Cualquiera</td></tr>
+            <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/evidence/export</code></td><td>Exportar evidencia con SHA-256</td><td>🔑 Admin+</td></tr>
+            <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/evidence</code></td><td>Listar evidencia exportada</td><td>🔑 Cualquiera</td></tr>
+            <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/evidence/{id}/download</code></td><td>Descargar archivo de evidencia</td><td>🔑 Cualquiera</td></tr>
+            <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/evidence/{id}/manifest</code></td><td>Ver manifest (cadena custodia)</td><td>🔑 Cualquiera</td></tr>
+            <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/cameras</code></td><td>Listar cámaras registradas</td><td>🔑 Cualquiera</td></tr>
+            <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/users</code></td><td>Listar usuarios</td><td>🔒 SuperAdmin</td></tr>
+            <tr><td><span class="badge badge-green">POST</span></td><td><code>/api/users</code></td><td>Crear usuario</td><td>🔒 SuperAdmin</td></tr>
+            <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/audit</code></td><td>Ver log de auditoría</td><td>🔒 SuperAdmin</td></tr>
+            <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/backups/runs</code></td><td>Historial de backups</td><td>🔑 Admin+</td></tr>
+            <tr><td><span class="badge badge-blue">GET</span></td><td><code>/api/health</code></td><td>Health check del sistema</td><td>—</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ======================== QUIZ ======================== -->
+<div class="section" id="quiz">
+    <div class="section-header" onclick="markSection(0)">
+        <div class="section-number" style="background:rgba(249,115,22,0.2);color:var(--orange)">🧠</div>
+        <h3>Quiz — ¿Cuánto aprendiste?</h3>
+        <span class="tag badge-orange">Evalúa</span>
+    </div>
+
+    <div class="quiz-card">
+        <h4>Pregunta 1: ¿Quién detecta personas en el video?</h4>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">El backend (FastAPI)</button>
+        <button class="quiz-option" onclick="checkQuiz(this, true)">Frigate NVR con IA</button>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">El frontend (Next.js)</button>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">PostgreSQL con triggers</button>
+        <div class="quiz-result" id="q1-result"></div>
+    </div>
+
+    <div class="quiz-card">
+        <h4>Pregunta 2: ¿Cada cuánto el backend consulta eventos nuevos de Frigate?</h4>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">En tiempo real (WebSocket)</button>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">Cada 5 segundos</button>
+        <button class="quiz-option" onclick="checkQuiz(this, true)">Cada 30 segundos (polling HTTP)</button>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">Solo cuando el usuario hace click en Sincronizar</button>
+        <div class="quiz-result"></div>
+    </div>
+
+    <div class="quiz-card">
+        <h4>Pregunta 3: ¿Qué garantiza que la evidencia exportada no fue alterada?</h4>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">Encriptación AES-256</button>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">El certificado TLS de Caddy</button>
+        <button class="quiz-option" onclick="checkQuiz(this, true)">Hash SHA-256 + manifest JSON</button>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">La firma digital del JWT</button>
+        <div class="quiz-result"></div>
+    </div>
+
+    <div class="quiz-card">
+        <h4>Pregunta 4: ¿Puede el frontend hablar directamente con Frigate?</h4>
+        <button class="quiz-option" onclick="checkQuiz(this, true)">No — todo pasa por el backend como proxy</button>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">Sí — usa el puerto 8971 directo</button>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">Solo para streams en vivo</button>
+        <div class="quiz-result"></div>
+    </div>
+
+    <div class="quiz-card">
+        <h4>Pregunta 5: ¿Qué pasa si se va el internet?</h4>
+        <button class="quiz-option" onclick="checkQuiz(this, true)">Todo sigue funcionando — es on-prem. Solo el backup se pospone.</button>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">Se detiene la grabación hasta que vuelva</button>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">El portal deja de funcionar</button>
+        <div class="quiz-result"></div>
+    </div>
+
+    <div class="quiz-card">
+        <h4>Pregunta 6: ¿Qué rol puede crear nuevos usuarios?</h4>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">Admin</button>
+        <button class="quiz-option" onclick="checkQuiz(this, true)">SuperAdmin</button>
+        <button class="quiz-option" onclick="checkQuiz(this, false)">Cualquiera autenticado</button>
+        <div class="quiz-result"></div>
+    </div>
+</div>
+
+</main>
+
+<footer>
+    <p>NVR Portal — Clase Interactiva | Hecho para el equipo de seguridad | 2026</p>
+</footer>
+
+<!-- ======================== JAVASCRIPT ======================== -->
+<script>
+    // ===== ARCHITECTURE DETAIL PANEL =====
+    const details = {
+        frigate: {
+            title: '📹 Frigate NVR — El sistema de grabación inteligente',
+            desc: 'Frigate es un NVR (Network Video Recorder) open-source con detección de objetos por IA. Recibe streams RTSP de las cámaras, graba 24/7, y detecta personas, autos, perros y gatos en tiempo real a 5 FPS.',
+            extra: `
+                <ul>
+                    <li><strong>Puerto 8971:</strong> UI web propia de Frigate (acceso directo para debug)</li>
+                    <li><strong>Puerto 5000:</strong> API interna (solo el backend la usa)</li>
+                    <li><strong>Detector:</strong> CPU por defecto, soporta GPU NVIDIA (TensorRT)</li>
+                    <li><strong>Grabación:</strong> Stream principal a calidad completa, sub-stream a 640x360 para detección</li>
+                    <li><strong>Retención:</strong> 14 días de grabación continua, 30 días para eventos</li>
+                    <li><strong>Config:</strong> <code>infra/frigate/config.yml</code> (prod) / <code>config.dev.yml</code> (dev)</li>
+                </ul>`
+        },
+        backend: {
+            title: '⚙️ Backend — El cerebro que conecta todo',
+            desc: 'API REST hecha con FastAPI (Python 3.12). Maneja autenticación, autorización, sincronización con Frigate, exportación de evidencia, y auditoría. Es el ÚNICO punto de contacto entre el frontend y todos los demás servicios.',
+            extra: `
+                <ul>
+                    <li><strong>Framework:</strong> FastAPI — auto-documenta endpoints en <code>/docs</code></li>
+                    <li><strong>ORM:</strong> SQLAlchemy 2.0 — mapea tablas de Postgres a objetos Python</li>
+                    <li><strong>Auth:</strong> JWT tokens (1h acceso, 24h refresh) + bcrypt para passwords</li>
+                    <li><strong>MFA:</strong> TOTP con pyotp — compatible con Google Authenticator</li>
+                    <li><strong>Scheduler:</strong> APScheduler ejecuta sync con Frigate cada 30 segundos</li>
+                    <li><strong>Logging:</strong> structlog — logs estructurados en JSON</li>
+                </ul>`
+        },
+        frontend: {
+            title: '🖥️ Frontend — El portal web para los administradores',
+            desc: 'Aplicación web Next.js 14 con React 18 y Tailwind CSS. Tema oscuro, 8 páginas, sidebar de navegación. Se construye como standalone (server.js) y corre en Node.js dentro de Docker.',
+            extra: `
+                <ul>
+                    <li><strong>Framework:</strong> Next.js 14 con App Router</li>
+                    <li><strong>UI:</strong> Tailwind CSS 3.4 — tema oscuro con slate/blue</li>
+                    <li><strong>Íconos:</strong> lucide-react (similares a Feather Icons)</li>
+                    <li><strong>API Client:</strong> <code>src/lib/api.ts</code> — cliente centralizado con auto-redirect en 401</li>
+                    <li><strong>Auth:</strong> Token JWT guardado en localStorage</li>
+                    <li><strong>Build:</strong> Standalone output — no necesita node_modules en producción</li>
+                </ul>`
+        },
+        postgres: {
+            title: '🗄️ PostgreSQL 16 — La base de datos relacional',
+            desc: 'Almacena TODA la metadata: usuarios, cámaras, eventos sincronizados, exportaciones de evidencia, log de auditoría, y registros de backup. Es la "fuente de verdad" del sistema.',
+            extra: `
+                <ul>
+                    <li><strong>9 tablas:</strong> tenants, sites, users, mfa_totp, cameras, events, evidence_exports, audit_log, backup_runs</li>
+                    <li><strong>Migraciones:</strong> Alembic — versiona cambios en el schema</li>
+                    <li><strong>Driver:</strong> psycopg3 (sync) — el más moderno para Python</li>
+                    <li><strong>Datos:</strong> Persistidos en <code>./data/postgres/</code></li>
+                    <li><strong>Healthcheck:</strong> <code>pg_isready</code> cada 10 segundos</li>
+                </ul>`
+        },
+        minio: {
+            title: '📦 MinIO — Object Storage S3-compatible',
+            desc: 'Almacenamiento de objetos compatible con Amazon S3. En este MVP se usa para almacenar archivos de evidencia de forma robusta. Alternativa: filesystem directo en /evidence.',
+            extra: `
+                <ul>
+                    <li><strong>Bucket:</strong> "evidence" — almacena clips y snapshots sellados</li>
+                    <li><strong>Console:</strong> <code>http://localhost:9001</code> — interfaz web para explorar archivos</li>
+                    <li><strong>API S3:</strong> Compatible con AWS SDK, boto3, minio-py</li>
+                    <li><strong>Datos:</strong> Persistidos en <code>./data/minio/</code></li>
+                </ul>`
+        },
+        caddy: {
+            title: '🔒 Caddy — Reverse Proxy con TLS automático',
+            desc: 'Caddy es el único servicio expuesto al exterior. Recibe TODAS las peticiones HTTP/HTTPS y las rutea: /api/* → backend, / → frontend. Además agrega TLS y headers de seguridad.',
+            extra: `
+                <ul>
+                    <li><strong>TLS:</strong> Certificado interno (LAN) o Let\'s Encrypt (dominio público)</li>
+                    <li><strong>Headers:</strong> HSTS, X-Frame-Options DENY, X-Content-Type-Options nosniff</li>
+                    <li><strong>Ruteo:</strong> <code>/api/*</code> → backend:8000, <code>/*</code> → frontend:3000</li>
+                    <li><strong>Config:</strong> <code>infra/caddy/Caddyfile</code></li>
+                    <li><strong>Puertos:</strong> 80 (redirect), 443 (HTTPS)</li>
+                </ul>`
+        },
+        backup: {
+            title: '☁️ rclone — Backup nocturno cifrado a Google Drive',
+            desc: 'Contenedor Alpine con cron que ejecuta un script bash a las 02:10 AM. Copia grabaciones, clips y evidencia a Google Drive con cifrado. Verifica integridad post-subida.',
+            extra: `
+                <ul>
+                    <li><strong>Hora:</strong> 02:10 AM (configurable en crontab)</li>
+                    <li><strong>Método:</strong> <code>rclone copy</code> (NO sync — nunca borra local)</li>
+                    <li><strong>Cifrado:</strong> rclone crypt — cifra nombres y contenido</li>
+                    <li><strong>Verificación:</strong> <code>rclone check</code> compara hashes</li>
+                    <li><strong>Retención:</strong> 14 días (configurable)</li>
+                    <li><strong>Logs:</strong> <code>./data/backup-logs/</code></li>
+                </ul>`
+        },
+        rtsp: {
+            title: '🎬 MediaMTX — Simulador RTSP para desarrollo',
+            desc: 'Simula 2 cámaras RTSP usando videos MP4 en loop. Permite probar TODO el sistema sin necesitar cámaras reales. Solo se activa con el perfil "dev".',
+            extra: `
+                <ul>
+                    <li><strong>Cámara 1:</strong> <code>rtsp://rtsp-sim:8554/cam_entrada/stream1</code></li>
+                    <li><strong>Cámara 2:</strong> <code>rtsp://rtsp-sim:8554/cam_patio/stream1</code></li>
+                    <li><strong>Videos:</strong> Generados con ffmpeg (<code>generate_samples.ps1</code>)</li>
+                    <li><strong>Sub-streams:</strong> 640x360 para detección (generados en tiempo real)</li>
+                    <li><strong>Solo dev:</strong> Se activa con <code>--profile dev</code></li>
+                </ul>`
+        }
+    };
+
+    let activeDetail = null;
+
+    function showDetail(key) {
+        const d = details[key];
+        const panel = document.getElementById('detail-panel');
+        const boxes = document.querySelectorAll('.arch-box');
+
+        boxes.forEach(b => b.classList.remove('active'));
+
+        if (activeDetail === key) {
+            panel.classList.remove('visible');
+            activeDetail = null;
+            return;
+        }
+
+        event.currentTarget.classList.add('active');
+        document.getElementById('detail-title').textContent = d.title;
+        document.getElementById('detail-desc').textContent = d.desc;
+        document.getElementById('detail-extra').innerHTML = d.extra;
+        panel.classList.add('visible');
+        activeDetail = key;
+    }
+
+    // ===== TABS =====
+    function switchTab(e, tabId) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    // ===== QUIZ =====
+    function checkQuiz(btn, isCorrect) {
+        const card = btn.closest('.quiz-card');
+        const buttons = card.querySelectorAll('.quiz-option');
+        const result = card.querySelector('.quiz-result');
+
+        buttons.forEach(b => {
+            b.disabled = true;
+            b.style.cursor = 'default';
+            b.style.opacity = '0.6';
+        });
+
+        if (isCorrect) {
+            btn.classList.add('correct');
+            btn.style.opacity = '1';
+            result.style.display = 'block';
+            result.style.background = 'rgba(34,197,94,0.15)';
+            result.style.color = '#22c55e';
+            result.textContent = '✅ ¡Correcto!';
+        } else {
+            btn.classList.add('wrong');
+            result.style.display = 'block';
+            result.style.background = 'rgba(239,68,68,0.15)';
+            result.style.color = '#ef4444';
+            result.textContent = '❌ Incorrecto — revisa la sección correspondiente';
+            // Highlight correct
+            buttons.forEach(b => {
+                if (!b.classList.contains('wrong')) {
+                    // Find the correct one by re-checking onclick
+                }
+            });
+        }
+    }
+
+    // ===== PROGRESS TRACKING =====
+    const visited = new Set();
+    function markSection(num) {
+        if (num === 0) return;
+        visited.add(num);
+        const pct = Math.round((visited.size / 6) * 100);
+        document.getElementById('progress-fill').style.width = pct + '%';
+        document.getElementById('progress-text').textContent = `${visited.size} / 6 secciones`;
+    }
+
+    // ===== SMOOTH SCROLL =====
+    document.querySelectorAll('.nav-links a').forEach(a => {
+        a.addEventListener('click', e => {
+            document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+            a.classList.add('active');
+        });
+    });
+</script>
+
+</body>
+</html>
