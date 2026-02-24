@@ -51,16 +51,17 @@ cameras:
     enabled: true
     ffmpeg:
       inputs:
-        - path: rtsp://rtsp-sim:8554/cam_entrada/stream1
+        # OBS RTSP Server (C920 webcam via OBS)
+        # Using IPv4 directly to avoid IPv6 routing issues on internal network
+        - path: rtsp://192.168.65.254:554/live
+          input_args: preset-rtsp-restream
           roles:
             - record
-        - path: rtsp://rtsp-sim:8554/cam_entrada/stream2
-          roles:
             - detect
     detect:
       enabled: true
       width: 640
-      height: 360
+      height: 480
       fps: 5
 
   cam_patio:

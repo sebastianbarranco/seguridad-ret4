@@ -5,3 +5,4 @@ from app.models.evidence import EvidenceExport  # noqa: F401
 from app.models.audit import AuditLog  # noqa: F401
 from app.models.backup import BackupRun  # noqa: F401
 from app.models.tenant import Tenant, Site  # noqa: F401
+from app.models.recording import Recording  # noqa: F401

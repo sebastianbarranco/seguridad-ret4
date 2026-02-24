@@ -149,6 +149,7 @@ from app.api.events import router as events_router
 from app.api.evidence import router as evidence_router
 from app.api.audit import router as audit_router
 from app.api.backups import router as backups_router
+from app.api.recordings import router as recordings_router
 
 app.include_router(auth_router)
 app.include_router(users_router)
@@ -157,6 +158,7 @@ app.include_router(events_router)
 app.include_router(evidence_router)
 app.include_router(audit_router)
 app.include_router(backups_router)
+app.include_router(recordings_router)
 
 
 @app.get("/api/health")

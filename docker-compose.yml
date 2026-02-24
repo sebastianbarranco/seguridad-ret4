@@ -45,6 +45,8 @@ services:
   frigate:
     image: ghcr.io/blakeblackshear/frigate:stable
     shm_size: "256mb"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./infra/frigate/config.yml:/config/config.yml:ro
       - ./data/frigate:/media/frigate
@@ -76,6 +78,8 @@ services:
         condition: service_healthy
     volumes:
       - ./data/evidence:/evidence
+      - ./data/recordings:/recordings
+      - ./samples:/samples:ro
     networks: [core]
     restart: unless-stopped
 

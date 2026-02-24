@@ -138,6 +138,28 @@ export function verifyMfa(code: string) {
   });
 }
 
+// --- Recordings ---
+export function getRecordings(params?: Record<string, string>) {
+  const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+  return apiFetch(`/recordings${qs}`);
+}
+
+export function getRecording(id: string) {
+  return apiFetch(`/recordings/${id}`);
+}
+
+export function getRecordingPlayUrl(id: string) {
+  return `${API_BASE}/recordings/${id}/play`;
+}
+
+export function simulateRecording() {
+  return apiFetch('/recordings/simulate', { method: 'POST' });
+}
+
+export function deleteRecording(id: string) {
+  return apiFetch(`/recordings/${id}`, { method: 'DELETE' });
+}
+
 // --- Health ---
 export function healthCheck() {
   return apiFetch('/health');
