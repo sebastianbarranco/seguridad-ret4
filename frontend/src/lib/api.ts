@@ -149,7 +149,9 @@ export function getRecording(id: string) {
 }
 
 export function getRecordingPlayUrl(id: string) {
-  return `${API_BASE}/recordings/${id}/play`;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+  const qs = token ? `?token=${encodeURIComponent(token)}` : '';
+  return `${API_BASE}/recordings/${id}/play${qs}`;
 }
 
 export function simulateRecording() {

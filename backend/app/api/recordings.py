@@ -67,8 +67,37 @@ def get_recording(recording_id: uuid.UUID, user: CurrentUser, db: Session = Depe
 
 
 @router.get("/{recording_id}/play")
-def play_recording(recording_id: uuid.UUID, user: CurrentUser, db: Session = Depends(get_db)):
-    """Stream the recording MP4 file for playback in the browser."""
+def play_recording(
+    recording_id: uuid.UUID,
+    request: Request,
+    db: Session = Depends(get_db),
+    token: str | None = Query(None, description="JWT token for browser media elements"),
+):
+    """Stream the recording MP4 file for playback in the browser.
+    Accepts auth via Authorization header OR ?token= query parameter
+    (needed because <video> tags cannot send custom headers)."""
+    from app.core import decode_token as _decode
+    from app.models.user import User
+
+    user = None
+    # Try Authorization header first
+    auth_header = request.headers.get("authorization", "")
+    if auth_header.startswith("Bearer "):
+        jwt_token = auth_header[7:]
+        payload = _decode(jwt_token)
+        if payload and payload.get("type") == "access":
+            uid = payload.get("sub")
+            if uid:
+                user = db.query(User).filter(User.id == uuid.UUID(uid)).first()
+    # Fallback: query string token (for <video> elements)
+    if user is None and token:
+        payload = _decode(token)
+        if payload and payload.get("type") == "access":
+            uid = payload.get("sub")
+            if uid:
+                user = db.query(User).filter(User.id == uuid.UUID(uid)).first()
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication required")
     rec = db.query(Recording).filter(Recording.id == recording_id).first()
     if not rec:
         raise HTTPException(status_code=404, detail="Recording not found")
