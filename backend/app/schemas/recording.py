@@ -11,6 +11,7 @@ class RecordingOut(BaseModel):
     id: uuid.UUID
     camera_id: uuid.UUID
     recording_date: date
+    hour: int = 0
     filename: str
     duration_seconds: Optional[float] = None
     size_bytes: Optional[int] = None
@@ -24,4 +25,5 @@ class RecordingOut(BaseModel):
 class RecordingUpload(BaseModel):
     camera_id: uuid.UUID
     recording_date: date
+    hour: int = 0
     duration_seconds: Optional[float] = None

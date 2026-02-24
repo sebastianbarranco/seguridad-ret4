@@ -41,10 +41,12 @@ def list_recordings(
     recording_date: date | None = None,
     from_date: date | None = None,
     to_date: date | None = None,
-    limit: int = Query(50, ge=1, le=200),
+    hour_from: int | None = Query(None, ge=0, le=23),
+    hour_to: int | None = Query(None, ge=0, le=23),
+    limit: int = Query(200, ge=1, le=500),
     offset: int = Query(0, ge=0),
 ):
-    """List recordings with optional filters by camera and date range."""
+    """List recordings with optional filters by camera, date range, and hour range."""
     q = db.query(Recording)
     if camera_id:
         q = q.filter(Recording.camera_id == camera_id)
@@ -54,7 +56,11 @@ def list_recordings(
         q = q.filter(Recording.recording_date >= from_date)
     if to_date:
         q = q.filter(Recording.recording_date <= to_date)
-    q = q.order_by(Recording.recording_date.desc(), Recording.created_at.desc())
+    if hour_from is not None:
+        q = q.filter(Recording.hour >= hour_from)
+    if hour_to is not None:
+        q = q.filter(Recording.hour <= hour_to)
+    q = q.order_by(Recording.recording_date.desc(), Recording.hour.asc())
     return q.offset(offset).limit(limit).all()
 
 
@@ -179,8 +185,8 @@ def simulate_daily_recording(
     request: Request,
     db: Session = Depends(get_db),
 ):
-    """Simulate a daily recording cut: copies sample videos as 'yesterday's' recordings.
-    This creates a recording entry for each camera as if they recorded yesterday."""
+    """Simulate 24 hours of recordings (one per hour) for yesterday for each camera.
+    Each hour gets a short video with timestamp overlay — simulates a real NVR system."""
     _require_admin(user)
     _ensure_dir()
 
@@ -190,67 +196,73 @@ def simulate_daily_recording(
     if not cameras:
         raise HTTPException(status_code=400, detail="No cameras configured")
 
-    # Check for sample videos
+    # Check for sample videos to use as base
     sample_dir = "/samples"
     sample_files = []
     if os.path.exists(sample_dir):
         sample_files = [f for f in os.listdir(sample_dir) if f.endswith(('.mp4', '.mkv'))]
 
-    created = []
-    for i, cam in enumerate(cameras):
-        # Check if already has a recording for yesterday
-        existing = db.query(Recording).filter(
-            Recording.camera_id == cam.id,
-            Recording.recording_date == yesterday,
-        ).first()
-        if existing:
-            continue
+    # Delete any existing recordings for yesterday (clean re-simulate)
+    existing = db.query(Recording).filter(Recording.recording_date == yesterday).all()
+    for ex in existing:
+        fpath = os.path.join(RECORDINGS_DIR, ex.filename)
+        if os.path.exists(fpath):
+            os.remove(fpath)
+        db.delete(ex)
+    if existing:
+        db.commit()
 
-        # Create date directory
+    created_count = 0
+    for cam in cameras:
         date_dir = os.path.join(RECORDINGS_DIR, yesterday.isoformat())
         os.makedirs(date_dir, exist_ok=True)
 
-        # Pick a sample file or generate a test pattern
-        safe_name = f"{cam.frigate_name}_{yesterday.isoformat()}.mp4"
-        dest_path = os.path.join(date_dir, safe_name)
+        for hour in range(24):
+            safe_name = f"{cam.frigate_name}_{yesterday.isoformat()}_H{hour:02d}.mp4"
+            dest_path = os.path.join(date_dir, safe_name)
 
-        if sample_files:
-            # Use existing sample
-            src = os.path.join(sample_dir, sample_files[i % len(sample_files)])
-            shutil.copy2(src, dest_path)
-        else:
-            # Generate a 30-second test pattern using ffmpeg
-            os.system(
-                f'ffmpeg -y -f lavfi -i "testsrc2=size=1280x720:rate=30:duration=30" '
-                f'-f lavfi -i "sine=frequency=440:duration=30" '
-                f'-c:v libx264 -preset ultrafast -c:a aac -shortest '
-                f'"{dest_path}" 2>/dev/null'
-            )
+            if sample_files:
+                # Copy sample as base
+                src = os.path.join(sample_dir, sample_files[hour % len(sample_files)])
+                shutil.copy2(src, dest_path)
+                # Get duration from file
+                duration = 30.0
+            else:
+                duration = 15.0
+                os.system(
+                    f'ffmpeg -y -f lavfi -i "testsrc2=size=1280x720:rate=15:duration=15" '
+                    f'-vf "drawtext=text=\'{cam.frigate_name} {yesterday} {hour:02d}\\:00\':fontcolor=white:fontsize=28:'
+                    f'x=10:y=10:box=1:boxcolor=black@0.6:boxborderw=5" '
+                    f'-c:v libx264 -preset ultrafast -crf 30 '
+                    f'"{dest_path}" 2>/dev/null'
+                )
 
-        if os.path.exists(dest_path):
-            file_size = os.path.getsize(dest_path)
-            rec = Recording(
-                id=uuid.uuid4(),
-                camera_id=cam.id,
-                recording_date=yesterday,
-                filename=f"{yesterday.isoformat()}/{safe_name}",
-                duration_seconds=30.0,
-                size_bytes=file_size,
-                status="available",
-            )
-            db.add(rec)
-            created.append(cam.frigate_name)
+            if os.path.exists(dest_path):
+                file_size = os.path.getsize(dest_path)
+                rec = Recording(
+                    id=uuid.uuid4(),
+                    camera_id=cam.id,
+                    recording_date=yesterday,
+                    hour=hour,
+                    filename=f"{yesterday.isoformat()}/{safe_name}",
+                    duration_seconds=duration,
+                    size_bytes=file_size,
+                    status="available",
+                )
+                db.add(rec)
+                created_count += 1
 
     db.commit()
 
     audit(db, action="recording_simulate", user=user, request=request,
-          meta={"date": yesterday.isoformat(), "cameras": created})
+          meta={"date": yesterday.isoformat(), "cameras": [c.frigate_name for c in cameras],
+                "segments": created_count})
 
     return {
         "date": yesterday.isoformat(),
-        "cameras": created,
-        "count": len(created),
-        "message": f"Simulación completada: {len(created)} grabaciones creadas para {yesterday.isoformat()}"
+        "cameras": [c.frigate_name for c in cameras],
+        "count": created_count,
+        "message": f"Simulación completada: {created_count} segmentos horarios ({len(cameras)} cámaras × 24 horas) para {yesterday.isoformat()}"
     }
 
 
