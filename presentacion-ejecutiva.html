@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Presentación Ejecutiva — NVR Portal</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#121a2b;
+      --muted:#9aa4b2;
+      --text:#e5e7eb;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --line:#22304a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Segoe UI,system-ui,-apple-system,Arial,sans-serif;
+      background:linear-gradient(180deg,#0b1220 0%,#0f172a 100%);
+      color:var(--text);
+      line-height:1.45;
+    }
+    .wrap{max-width:1100px;margin:0 auto;padding:28px}
+    h1,h2,h3{margin:0 0 10px}
+    h1{font-size:30px}
+    h2{font-size:22px;margin-top:24px}
+    h3{font-size:16px;color:#dbeafe}
+    p{margin:0 0 10px;color:#d1d5db}
+    .muted{color:var(--muted)}
+    .grid{display:grid;gap:14px}
+    .g2{grid-template-columns:repeat(auto-fit,minmax(270px,1fr))}
+    .card{
+      background:rgba(18,26,43,.92);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:16px;
+      box-shadow:0 8px 24px rgba(0,0,0,.25);
+    }
+    .badge{
+      display:inline-block;
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:999px;
+      background:#13213c;
+      border:1px solid #29416b;
+      color:#bfdbfe;
+      margin-right:6px;
+      margin-bottom:6px;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:10px;
+      font-size:14px;
+    }
+    th,td{border:1px solid var(--line);padding:10px;text-align:left;vertical-align:top}
+    th{background:#0f1a31;color:#dbeafe}
+    pre{
+      background:#0b152b;
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:12px;
+      overflow:auto;
+      color:#cbd5e1;
+      font-family:Consolas,Menlo,monospace;
+      font-size:12.5px;
+    }
+    ul{margin:8px 0 0 18px;padding:0}
+    li{margin:6px 0}
+    .footer{margin-top:20px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="card">
+      <h1>🎥 NVR Portal — Presentación Ejecutiva</h1>
+      <p class="muted">Sistema de videovigilancia on-prem para retorno/caseta cerrada con grabación 24/7 y respaldo nocturno.</p>
+      <div style="margin-top:10px">
+        <span class="badge">On-Prem</span>
+        <span class="badge">2 Cámaras RTSP</span>
+        <span class="badge">Frigate NVR</span>
+        <span class="badge">FastAPI + Next.js</span>
+        <span class="badge">Backup Nocturno</span>
+      </div>
+    </header>
+
+    <section class="card" style="margin-top:14px">
+      <h2>Arquitectura</h2>
+      <pre>
+Cámara 1 (RTSP) ─┐
+                 ├──> Frigate NVR (grabación continua + detección)
+Cámara 2 (RTSP) ─┘
+                        │
+                        ├──> Backend FastAPI (auth, RBAC, MFA)
+                        ├──> PostgreSQL (metadatos/auditoría)
+                        ├──> MinIO (evidencia)
+                        └──> Frontend Next.js + Caddy
+
+Respaldo nocturno:
+Frigate/MinIO/Postgres ──> rclone ──> Google Drive / OneDrive
+      </pre>
+    </section>
+
+    <section class="grid g2" style="margin-top:14px">
+      <article class="card">
+        <h2>Flujo Diario</h2>
+        <ul>
+          <li>Captura 24/7 de ambas cámaras.</li>
+          <li>Detección de objetos y eventos.</li>
+          <li>Consulta de clips/snapshots desde el portal.</li>
+          <li>Exportación de evidencia con hash SHA-256.</li>
+          <li>Backup automático nocturno.</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h2>Seguridad</h2>
+        <ul>
+          <li>JWT + RBAC + MFA (TOTP).</li>
+          <li>Auditoría completa de acciones.</li>
+          <li>VPN para acceso remoto seguro.</li>
+          <li>Cifrado y verificación de integridad en backups.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="card" style="margin-top:14px">
+      <h2>Presupuesto Referencial (MXN)</h2>
+      <table>
+        <thead>
+          <tr><th>Concepto</th><th>Cantidad</th><th>Rango</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Reolink RLC-810WA</td><td>2</td><td>$4,400 – $5,800</td></tr>
+          <tr><td>Mini PC (N100, 16GB, SSD 512GB)</td><td>1</td><td>$5,500 – $8,500</td></tr>
+          <tr><td>Disco vigilancia 4TB</td><td>1</td><td>$2,000 – $2,800</td></tr>
+          <tr><td>Router/AP + enlace PtP + UPS/accesorios</td><td>1 lote</td><td>$9,800 – $19,300</td></tr>
+          <tr><td><strong>Total estimado</strong></td><td>—</td><td><strong>$21,700 – $36,400</strong></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="footer">
+      Documento ejecutivo — admin_ret4
+    </div>
+  </div>
+</body>
+</html>
